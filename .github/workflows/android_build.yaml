@@ -1,9 +1,8 @@
-name: Android Build
+name: Android  Debug Build
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
+  workflow_dispatch:
+  
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -28,6 +27,9 @@ jobs:
           validate-wrappers: true
           gradle-home-cache-cleanup: true
 
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x ./gradlew
+
       - name: Build Project with gradle
         run: ./gradlew assembleDebug
 
@@ -38,31 +40,18 @@ jobs:
         run: ./gradlew ktlintCheck
 
         # Upload all build artifacts in separate steps. This can be shortened once https://github.com/actions/upload-artifact/pull/354 is merged.
-      - name: Upload artifact nextplayer-universal-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: nextplayer-universal-debug.apk
-          path: ./app/build/outputs/apk/debug/app-universal-debug.apk
       - name: Upload artifact nextplayer-arm64-v8a-debug.apk
         uses: actions/upload-artifact@v7
         with:
-          name: nextplayer-arm64-v8a-debug.apk
+          name: videoplayer-arm64-v8a-debug.apk
           path: ./app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+          retention-days: 3
       - name: Upload artifact nextplayer-armeabi-v7a-debug.apk
         uses: actions/upload-artifact@v7
         with:
-          name: nextplayer-armeabi-v7a-debug.apk
+          name: videoplayer-armeabi-v7a-debug.apk
           path: ./app/build/outputs/apk/debug/app-armeabi-v7a-debug.apk
-      - name: Upload artifact nextplayer-x86_64-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: nextplayer-x86_64-debug.apk
-          path: ./app/build/outputs/apk/debug/app-x86_64-debug.apk
-      - name: Upload artifact nextplayer-x86-debug.apk
-        uses: actions/upload-artifact@v7
-        with:
-          name: nextplayer-x86-debug.apk
-          path: ./app/build/outputs/apk/debug/app-x86-debug.apk
+          retention-days: 3
 
       - name: Upload build reports
         if: always()

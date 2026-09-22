@@ -41,7 +41,7 @@ smbj = "0.14.0"
 commonsNet = "3.13.0"
 sardineAndroid = "0.9"
 nanohttpd = "2.3.1"
-takemesohighCommons = "2774b495a1"
+takemesohighCommons = "2.1.0"
 
 [libraries]
 aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibraries" }

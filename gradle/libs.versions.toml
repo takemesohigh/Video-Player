@@ -41,7 +41,7 @@ smbj = "0.14.0"
 commonsNet = "3.13.0"
 sardineAndroid = "0.9"
 nanohttpd = "2.3.1"
-
+takemesohighCommons = "2.0.0"
 
 [libraries]
 aboutlibraries-core = { group = "com.mikepenz", name = "aboutlibraries-core", version.ref = "aboutlibraries" }
@@ -103,6 +103,7 @@ smbj = { group = "com.hierynomus", name = "smbj", version.ref = "smbj" }
 commons-net = { group = "commons-net", name = "commons-net", version.ref = "commonsNet" }
 sardine-android = { group = "com.github.thegrizzlylabs", name = "sardine-android", version.ref = "sardineAndroid" }
 nanohttpd = { group = "org.nanohttpd", name = "nanohttpd", version.ref = "nanohttpd" }
+takemesohigh-commons = { group = "com.github.takemesohigh", name = "Commons", version.ref = "takemesohighCommons" }
 
 [plugins]
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }

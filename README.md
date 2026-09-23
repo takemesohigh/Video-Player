@@ -28,7 +28,7 @@ Android devices
 - Control playback speed
 - External Subtitle support
 - Zoom gesture
-- Picture-in-picture mode
+- Picture-in-picture mode — **removed in this fork** (see Note below)
 - Background playback
 - Android TV version
 - Search Functionality
@@ -37,7 +37,15 @@ Android devices
 
 ## Note
 
-The code is derived from anilbeesetti/nextplayer at v0.17.5 under GPL-3.0.
+The code is derived from anilbeesetti/nextplayer at v0.18.0 under GPL-3.0, with minSdk lowered back to 23 (Android 6.0) for wider device support.
+
+Picture-in-picture support has been removed in this fork. Upstream's PiP implementation depends on `androidx.core:core-pip`, which declares minSdk 24 in its own manifest and is incompatible with this fork's minSdk 23. Since PiP itself requires Android 8.0 (API 26) regardless of this library, dropping it costs nothing on this fork's minimum-supported devices — it only affects API 26+ devices, which would otherwise have had PiP available. If you fork this project and want PiP support restored on API 26+ while keeping minSdk 23 for older devices, you'll need to reimplement it using the framework's `android.app.PictureInPictureParams` API directly instead of `core-pip`.
+
+## Translations
+
+This fork ships with English strings only; all other locale translations have been removed to keep the project maintainable for a single maintainer. If you fork this repository and want translations, you're responsible for adding them yourself.
+
+The source strings to translate from are in [`core/ui/src/main/res/values/strings.xml`](core/ui/src/main/res/values/strings.xml) (and other modules' `values/strings.xml` files, where applicable). Android Studio's built-in [Translations Editor](https://developer.android.com/studio/write/translations-editor) is the easiest way to add a new locale — right-click any `strings.xml` file, select **Open editor**, and use **Add Locale**.
 
 ## License
 

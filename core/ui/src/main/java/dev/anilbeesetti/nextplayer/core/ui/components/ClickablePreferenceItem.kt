@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
@@ -16,6 +17,7 @@ fun ClickablePreferenceItem(
     description: String? = null,
     enabled: Boolean = true,
     icon: ImageVector? = null,
+    painter: Painter? = null,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
     isFirstItem: Boolean = false,
@@ -25,6 +27,7 @@ fun ClickablePreferenceItem(
         title = title,
         description = description,
         icon = icon,
+        painter = painter,
         modifier = modifier,
         enabled = enabled,
         onClick = onClick,
@@ -40,8 +43,7 @@ private fun ClickablePreferenceItemPreview() {
     ClickablePreferenceItem(
         title = "Title",
         description = "Description of the preference item goes here.",
-        icon = NextIcons.DoubleTap,
-        onClick = {},
         enabled = false,
+        icon = NextIcons.DoubleTap,
     )
 }

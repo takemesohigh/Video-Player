@@ -1,15 +1,14 @@
 package dev.anilbeesetti.nextplayer.feature.videopicker.navigation
 
 import android.net.Uri
+import androidx.compose.runtime.SideEffect
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import dev.anilbeesetti.nextplayer.feature.videopicker.screens.mediapicker.MediaPickerRoute
+import dev.anilbeesetti.nextplayer.feature.videopicker.screens.mediapicker.MediaPickerScreen
 import dev.anilbeesetti.nextplayer.feature.videopicker.screens.mediapicker.MediaPickerViewModel
 import kotlinx.serialization.Serializable
-
-class FolderArgs(val folderId: String?)
 
 @Serializable
 data class MediaPickerRoute(
@@ -30,17 +29,24 @@ fun EntryProviderScope<NavKey>.mediaPickerEntry(
     onVaultClick: () -> Unit,
 ) {
     entry<MediaPickerRoute> { key ->
-        MediaPickerRoute(
-            viewModel = hiltViewModel<MediaPickerViewModel, MediaPickerViewModel.Factory>(
-                creationCallback = { factory -> factory.create(FolderArgs(key.folderId)) },
-            ),
-            onPlayVideo = onPlayVideo,
-            onPlayVideos = onPlayVideos,
-            onNavigateUp = onNavigateUp,
-            onFolderClick = onFolderClick,
-            onSettingsClick = onSettingsClick,
-            onSearchClick = onSearchClick,
-            onVaultClick = onVaultClick,
+        val output = MediaPickerViewModel.Output(
+            navigateUp = onNavigateUp,
+            playVideo = onPlayVideo,
+            playVideos = onPlayVideos,
+            openFolder = onFolderClick,
+            openSettings = onSettingsClick,
+            openSearch = onSearchClick,
+            openVault = onVaultClick,
         )
+        val viewModel = hiltViewModel<MediaPickerViewModel, MediaPickerViewModel.Factory>(
+            creationCallback = { factory ->
+                factory.create(
+                    input = MediaPickerViewModel.Input(folderId = key.folderId),
+                    output = output,
+                )
+            },
+        )
+        SideEffect { viewModel.output = output }
+        MediaPickerScreen(viewModel = viewModel)
     }
 }

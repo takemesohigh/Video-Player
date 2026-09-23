@@ -2,7 +2,6 @@ package dev.anilbeesetti.nextplayer.settings.screens.about
 
 import android.content.ClipData
 import android.content.Context
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -24,9 +23,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import dev.anilbeesetti.nextplayer.settings.utils.rememberTvListFocusRequester
-import dev.anilbeesetti.nextplayer.settings.utils.tvFocusDown
-import dev.anilbeesetti.nextplayer.settings.utils.tvListFocus
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,7 +45,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -57,27 +52,37 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.anilbeesetti.nextplayer.core.common.extensions.appIcon
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.components.ClickablePreferenceItem
 import dev.anilbeesetti.nextplayer.core.ui.components.ListSectionTitle
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
+import dev.anilbeesetti.nextplayer.core.ui.components.rememberTvListFocusRequester
+import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusDown
+import dev.anilbeesetti.nextplayer.core.ui.components.tvListFocus
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import kotlinx.coroutines.launch
 
-private const val GITHUB_URL = "https://github.com/anilbeesetti/nextplayer"
-private const val KOFI_URL = "https://ko-fi.com/anilbeesetti"
-private const val PAYPAL_URL = "https://paypal.me/AnilBeesetti"
-private const val UPI_ID = "anilbeesetti10@oksbi"
+private const val GITHUB_URL = "https://github.com/takemesohigh/Video-Player"
+private const val GITHUBACCOUNT_URL = "https://github.com/takemesohigh"
+private const val GITHUBACCOUNT2_URL = "https://github.com/nahyo0901"
+private const val GITHUBACCOUNT3_URL = "https://github.com/Howielyn"
+private const val GITHUBACCOUNT4_URL = "https://github.com/thechaosman0225"
+
+@Composable
+fun AboutPreferencesScreen(viewModel: AboutPreferencesViewModel) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    AboutPreferencesScreenContent(state = state, onAction = viewModel::onAction)
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun AboutPreferencesScreen(
-    onLibrariesClick: () -> Unit,
-    onNavigateUp: () -> Unit,
+private fun AboutPreferencesScreenContent(
+    state: AboutPreferencesUiState,
+    onAction: (AboutPreferencesAction) -> Unit,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -90,7 +95,7 @@ fun AboutPreferencesScreen(
             NextTopAppBar(
                 title = stringResource(id = R.string.about_name),
                 navigationIcon = {
-                    FilledTonalIconButton(onClick = onNavigateUp, modifier = Modifier.tvFocusDown(listFocusRequester)) {
+                    FilledTonalIconButton(onClick = { onAction(AboutPreferencesAction.NavigateUp) }, modifier = Modifier.tvFocusDown(listFocusRequester)) {
                         Icon(
                             imageVector = NextIcons.ArrowBack,
                             contentDescription = stringResource(id = R.string.navigate_up),
@@ -111,50 +116,62 @@ fun AboutPreferencesScreen(
                 .padding(vertical = 16.dp),
         ) {
             AboutApp(
+                appVersion = state.appVersion,
                 onGithubClick = {
                     uriHandler.openUriOrShowToast(
                         uri = GITHUB_URL,
                         context = context,
                     )
                 },
-                onLibrariesClick = onLibrariesClick,
+                onLibrariesClick = { onAction(AboutPreferencesAction.OpenLibraries) },
             )
-            ListSectionTitle(text = stringResource(id = R.string.donate))
+            ListSectionTitle(text = stringResource(id = R.string.github_accounts))
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 ClickablePreferenceItem(
-                    title = stringResource(R.string.kofi),
-                    description = stringResource(R.string.support_the_developer_on, stringResource(R.string.kofi)),
-                    icon = ImageVector.vectorResource(R.drawable.ic_kofi),
+                    title = stringResource(R.string.dahyun_park),
+                    description = stringResource(R.string.github_accounts_description, stringResource(R.string.dahyun_park)),
+                    painter = painterResource(R.drawable.ic_github),
                     onClick = {
                         uriHandler.openUriOrShowToast(
-                            uri = KOFI_URL,
+                            uri = GITHUBACCOUNT_URL,
                             context = context,
                         )
                     },
-                    isFirstItem = true
+                    isFirstItem = true,
                 )
                 ClickablePreferenceItem(
-                    title = stringResource(R.string.paypal),
-                    description = stringResource(R.string.support_the_developer_on, stringResource(R.string.paypal)),
-                    icon = ImageVector.vectorResource(R.drawable.ic_paypal),
+                    title = stringResource(R.string.jihyo_kim),
+                    description = stringResource(R.string.github_accounts_description, stringResource(R.string.jihyo_kim)),
+                    painter = painterResource(R.drawable.ic_github),
                     onClick = {
                         uriHandler.openUriOrShowToast(
-                            uri = PAYPAL_URL,
+                            uri = GITHUBACCOUNT2_URL,
                             context = context,
                         )
                     },
                 )
                 ClickablePreferenceItem(
-                    title = stringResource(R.string.upi),
-                    description = UPI_ID,
-                    icon = ImageVector.vectorResource(R.drawable.ic_upi),
+                    title = stringResource(R.string.howard_arias),
+                    description = stringResource(R.string.github_accounts_description, stringResource(R.string.howard_arias)),
+                    painter = painterResource(R.drawable.ic_github),
                     onClick = {
-                        scope.launch {
-                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("text", UPI_ID)))
-                            Toast.makeText(context, "copied to clipboard", Toast.LENGTH_SHORT).show()
-                        }
+                        uriHandler.openUriOrShowToast(
+                            uri = GITHUBACCOUNT3_URL,
+                            context = context,
+                        )
+                    },
+                )
+                ClickablePreferenceItem(
+                    title = stringResource(R.string.kevin_young),
+                    description = stringResource(R.string.github_accounts_description, stringResource(R.string.kevin_young)),
+                    painter = painterResource(R.drawable.ic_github),
+                    onClick = {
+                        uriHandler.openUriOrShowToast(
+                            uri = GITHUBACCOUNT4_URL,
+                            context = context,
+                        )
                     },
                     isLastItem = true,
                 )
@@ -165,12 +182,12 @@ fun AboutPreferencesScreen(
 
 @Composable
 fun AboutApp(
+    appVersion: String,
     modifier: Modifier = Modifier,
     onGithubClick: () -> Unit,
     onLibrariesClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val appVersion = remember { context.appVersion() }
     val appIcon = remember { context.appIcon()?.asImageBitmap() }
 
     val colorPrimary = MaterialTheme.colorScheme.primaryContainer
@@ -299,19 +316,6 @@ fun AboutApp(
             }
         }
     }
-}
-
-private fun Context.appVersion(): String {
-    val packageInfo = packageManager.getPackageInfo(packageName, 0)
-
-    @Suppress("DEPRECATION")
-    val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        packageInfo.longVersionCode
-    } else {
-        packageInfo.versionCode
-    }
-
-    return "${packageInfo.versionName} ($versionCode)"
 }
 
 internal fun UriHandler.openUriOrShowToast(uri: String, context: Context) {

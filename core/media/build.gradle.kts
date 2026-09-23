@@ -38,6 +38,8 @@ dependencies {
     // Network protocols + local streaming proxy
     implementation(libs.smbj)
     implementation(libs.commons.net)
+    implementation(libs.sshj)
+    implementation(libs.bouncycastle.provider)
     implementation(libs.sardine.android) {
         // xpp3/stax bundle org.xmlpull.v1, which conflicts with the classes
         // already provided by the Android platform and breaks R8 minification.
@@ -45,7 +47,7 @@ dependencies {
         exclude(group = "stax", module = "stax")
         exclude(group = "stax", module = "stax-api")
     }
-    implementation(libs.nanohttpd)
+    implementation(libs.androidx.media3.datasource)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -54,6 +56,8 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
 
     testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.espresso.core)
 }

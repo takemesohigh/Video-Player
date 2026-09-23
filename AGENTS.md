@@ -6,6 +6,8 @@ Next Player is a Kotlin/Jetpack Compose multi-module Android app. `app/` owns ap
 
 Kotlin sources are under each module's `src/main/java/`; resources are in `src/main/res/`. Place JVM and Robolectric tests in `src/test/`, and device tests in `src/androidTest/`. Release metadata and screenshots belong in `fastlane/metadata/`.
 
+Never add or modify files in `fastlane/` unless the user explicitly asks.
+
 ## Build, Test, and Development Commands
 
 Use the checked-in Gradle wrapper and JDK 17:
@@ -21,8 +23,9 @@ For faster feedback, target a module: `./gradlew :core:media:test`.
 ## Coding Style & Naming Conventions
 
 - Follow `.editorconfig` and the Android Studio ktlint style: four-space indentation and trailing commas where supported. Use `PascalCase` for classes, files, and `@Composable` functions; use `camelCase` for methods and properties; keep packages lowercase under `dev.anilbeesetti.nextplayer`.
-- Choose the simplest implementation that fully meets the current requirements. 
-- Prefer established, well-maintained libraries over custom implementations. 
+- Place UI string and plurals resources in `core/ui/src/main/res/values/strings.xml` and reference them through `dev.anilbeesetti.nextplayer.core.ui.R`; do not create feature-local string resource files.
+- Choose the simplest implementation that fully meets the current requirements.
+- Prefer established, well-maintained libraries over custom implementations.
 - Optimize for the next reader: use clear names, small focused units, straightforward control flow, and existing module boundaries. Avoid unnecessary abstractions, clever shortcuts, and speculative flexibility.
 
 ## Testing Guidelines
@@ -34,6 +37,8 @@ After implementing a feature, or when asked to review one, validate the affected
 ## Commit & Pull Request Guidelines
 
 Write short, imperative commit subjects consistent with history, such as `Fix vault reservation concurrency`. Optional prefixes like `fix(media):`, `test:`, or `docs:` are acceptable when useful. Keep each commit focused.
+
+During feature work, commit each coherent, verified intermediate milestone instead of leaving multiple completed steps uncommitted until the end.
 
 Pull requests should explain the problem and solution, link the relevant issue, and list verification commands. Include before/after screenshots or recordings for UI changes and note device/API coverage for Android-specific behavior. Ensure `assembleDebug`, `test`, and `ktlintCheck` pass before requesting review.
 

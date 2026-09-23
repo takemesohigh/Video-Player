@@ -3,6 +3,7 @@ package dev.anilbeesetti.nextplayer.core.ui.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -28,6 +29,7 @@ fun PreferenceItem(
     title: String,
     description: String? = null,
     icon: ImageVector? = null,
+    painter: Painter? = null,
     enabled: Boolean,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
@@ -42,14 +44,26 @@ fun PreferenceItem(
         enabled = enabled,
         isFirstItem = isFirstItem,
         isLastItem = isLastItem,
-        leadingContent = icon?.let {
-            {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                )
+        leadingContent = when {
+            icon != null -> {
+                {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
+            painter != null -> {
+                {
+                    Icon(
+                        painter = painter,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
+            else -> null
         },
         supportingContent = description?.let {
             {

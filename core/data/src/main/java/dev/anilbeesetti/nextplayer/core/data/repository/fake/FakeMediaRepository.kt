@@ -7,19 +7,25 @@ import dev.anilbeesetti.nextplayer.core.model.Folder
 import dev.anilbeesetti.nextplayer.core.model.MediaInfo
 import dev.anilbeesetti.nextplayer.core.model.Video
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 class FakeMediaRepository : MediaRepository {
 
     val videos = mutableListOf<Video>()
     val directories = mutableListOf<Folder>()
+    private val updates = MutableStateFlow(0L)
 
     override fun observeFolders(folderPath: String?): Flow<List<Folder>> {
-        return flowOf(directories.filter { folderPath == null || it.path.startsWith(folderPath) })
+        return updates.map {
+            directories.filter { folderPath == null || it.path.startsWith(folderPath) }
+        }
     }
 
     override fun observeVideos(folderPath: String?): Flow<List<Video>> {
-        return flowOf(videos.filter { folderPath == null || it.path.startsWith(folderPath) })
+        return updates.map {
+            videos.filter { folderPath == null || it.path.startsWith(folderPath) }
+        }
     }
 
     override suspend fun fetchFolders(folderPath: String?): List<Folder> {
@@ -30,8 +36,20 @@ class FakeMediaRepository : MediaRepository {
         return videos.filter { folderPath == null || it.path.startsWith(folderPath) }
     }
 
+    override fun observePlaybackHistory(): Flow<List<Video>> {
+        return updates.map { videos.filter { it.lastPlayedAt != null }.sortedByDescending { it.lastPlayedAt?.time } }
+    }
+
+    override fun observeTrashVideos(): Flow<List<Video>> {
+        return updates.map { emptyList() }
+    }
+
     override suspend fun getVideoByUri(uri: String): Video? {
-        return videos.find { it.path == uri }
+        return videos.find { it.uriString == uri }
+    }
+
+    fun notifyMediaChanged() {
+        updates.value += 1
     }
 
     override suspend fun getVideoState(uri: String): VideoState? {
@@ -42,7 +60,10 @@ class FakeMediaRepository : MediaRepository {
         return null
     }
 
-    override suspend fun updateMediumLastPlayedTime(uri: String, lastPlayedTime: Long) {
+    override suspend fun clearPlaybackHistory() {
+    }
+
+    override suspend fun updateMediumLastPlayedTime(uri: String, lastPlayedTime: Long, duration: Long?) {
     }
 
     override suspend fun updateMediumPosition(uri: String, position: Long) {

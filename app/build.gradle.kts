@@ -141,6 +141,8 @@ dependencies {
 
     implementation(libs.github.anilbeesetti.nextlib.mediainfo)
 
+    implementation(libs.takemesohigh.commons)
+
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)

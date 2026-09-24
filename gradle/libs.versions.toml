@@ -3,6 +3,7 @@ android-compileSdk = "37"
 android-targetSdk = "37"
 android-minSdk = "23"
 android-jvm = "17"
+desugarJdk = "2.1.5"
 aboutlibraries = "15.2.0"
 accompanist = "0.37.3"
 androidGradlePlugin = "9.4.0"
@@ -43,7 +44,7 @@ universalChardet = "2.5.0"
 smbj = "0.14.0"
 commonsNet = "3.13.0"
 sardineAndroid = "0.9"
-takemesohighCommons = "v2.1.0"
+takemesohighCommons = "2.1.0"
 
 
 [libraries]
@@ -52,6 +53,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidxActivity" }
 androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "androidxActivity" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "androidxAppCompat" }
+android-desugar-jdklibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdk" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "androidxBiometric" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-icons = { module = "androidx.compose.material:material-icons-extended" }
@@ -112,6 +114,7 @@ bouncycastle-provider = { group = "org.bouncycastle", name = "bcprov-jdk18on", v
 commons-net = { group = "commons-net", name = "commons-net", version.ref = "commonsNet" }
 sardine-android = { group = "com.github.thegrizzlylabs", name = "sardine-android", version.ref = "sardineAndroid" }
 takemesohigh-commons = { group = "com.github.takemesohigh", name = "Commons", version.ref = "takemesohighCommons" }
+
 
 [plugins]
 aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }

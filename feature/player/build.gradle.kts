@@ -43,12 +43,12 @@ dependencies {
     implementation(project(":core:ui"))
 
     implementation(libs.androidx.core.ktx)
+	implementation(libs.androidx.core.pip)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewModel.ktx)
     implementation(libs.google.android.material)
-	implementation(libs.androidx.core.pip)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)

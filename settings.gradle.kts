@@ -14,6 +14,10 @@ dependencyResolutionManagement {
     }
 }
 
+   plugins {
+       id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+   }
+   
 
 // Opt in with -PnextlibPath=../nextlib to test unpublished decoder changes.
 providers.gradleProperty("nextlibPath").orNull?.let { nextlibPath ->

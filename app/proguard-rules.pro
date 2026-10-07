@@ -51,3 +51,7 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.ietf.jgss.**
 -dontwarn org.openjsse.**
+-dontwarn android.hardware.fingerprint.FingerprintManager
+-dontwarn android.hardware.fingerprint.FingerprintManager$AuthenticationCallback
+-dontwarn android.hardware.fingerprint.FingerprintManager$AuthenticationResult
+-dontwarn android.hardware.fingerprint.FingerprintManager$CryptoObject

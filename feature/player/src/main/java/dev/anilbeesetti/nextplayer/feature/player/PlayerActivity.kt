@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -19,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,9 +43,11 @@ import dev.anilbeesetti.nextplayer.feature.player.extensions.OpenDocumentAtIniti
 import dev.anilbeesetti.nextplayer.feature.player.extensions.setExtras
 import dev.anilbeesetti.nextplayer.feature.player.extensions.uriToSubtitleConfiguration
 import dev.anilbeesetti.nextplayer.feature.player.model.DecoderServiceState
+import dev.anilbeesetti.nextplayer.feature.player.popup.PopupWindowController
 import dev.anilbeesetti.nextplayer.feature.player.service.decoderServiceState
 import dev.anilbeesetti.nextplayer.feature.player.service.PlayerService
 import dev.anilbeesetti.nextplayer.feature.player.service.addSubtitleTrack
+import dev.anilbeesetti.nextplayer.feature.player.service.showPopupPlayer
 import dev.anilbeesetti.nextplayer.feature.player.service.stopPlayerSession
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlayerApi
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlaylistPlaybackContract
@@ -156,6 +160,7 @@ class PlayerActivity : ComponentActivity() {
                             playInBackground = true
                             finish()
                         },
+                        onPopupPlayerClick = { enterPopupPlayerMode() },
                     )
                 }
             }
@@ -171,6 +176,15 @@ class PlayerActivity : ComponentActivity() {
             mediaController = controllerFuture?.await()
 
             mediaController?.run {
+                if (PopupWindowController.isShowing) {
+                    // Returning to the full-screen UI while the popup was open. hide()
+                    // stops playback and detaches the popup's surface before this
+                    // activity's PlayerSurface attaches its own, so a running decoder
+                    // is never handed a new surface. startPlayback() below then resumes
+                    // through the existing returningFromBackground path, the same way
+                    // it already does for background play.
+                    PopupWindowController.hide()
+                }
                 updateKeepScreenOnFlag()
                 addListener(playbackStateListener)
                 startPlayback()
@@ -183,7 +197,9 @@ class PlayerActivity : ComponentActivity() {
             viewModel.playWhenReady = playWhenReady
             removeListener(playbackStateListener)
         }
-        val shouldPlayInBackground = playInBackground || playerPreferences?.autoBackgroundPlay == true
+        val shouldPlayInBackground = playInBackground ||
+                playerPreferences?.autoBackgroundPlay == true ||
+                PopupWindowController.isShowing
         if (subtitleFileSuspendLauncher.isAwaitingResult || !shouldPlayInBackground) {
             mediaController?.pause()
         }
@@ -221,7 +237,7 @@ class PlayerActivity : ComponentActivity() {
         val returningFromBackground = !isIntentNew && mediaController?.currentMediaItem != null
         val isNewUriTheCurrentMediaItem = mediaController?.currentMediaItem?.localConfiguration?.uri.toString() == uri.toString()
         val hasExplicitPlaylist = intent.hasExtra(PlayerApi.API_PLAYLIST) ||
-            intent.hasExtra(PlaylistPlaybackContract.EXTRA_PLAYLIST_ID)
+                intent.hasExtra(PlaylistPlaybackContract.EXTRA_PLAYLIST_ID)
 
         if (shouldResumeExistingPlayback(
                 returningFromBackground = returningFromBackground,
@@ -399,6 +415,40 @@ class PlayerActivity : ComponentActivity() {
     private fun finishAndStopPlayerSession() {
         finish()
         mediaController?.stopPlayerSession()
+    }
+
+    /**
+     * Fallback for devices without system Picture-in-Picture (API < 26), or where the
+     * user prefers a movable window. Requests the "draw over other apps" permission if
+     * needed, then asks PlayerService to open the floating popup and finishes this
+     * Activity. The popup lives in the service and talks to its player directly, so
+     * playback never depends on this Activity's controller, which is released in
+     * onStop(). The Activity waits for the service to confirm before finishing so the
+     * request is not lost with the controller.
+     */
+    private fun enterPopupPlayerMode() {
+        val currentController = mediaController ?: return
+
+        if (!Settings.canDrawOverlays(this)) {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    "package:$packageName".toUri(),
+                ),
+            )
+            return
+        }
+
+        val returnUri = intent.data
+        playInBackground = true
+
+        lifecycleScope.launch {
+            if (currentController.showPopupPlayer(returnUri)) {
+                finish()
+            } else {
+                playInBackground = false
+            }
+        }
     }
 
     override fun onWindowAttributesChanged(params: WindowManager.LayoutParams?) {

@@ -72,6 +72,7 @@ import dev.anilbeesetti.nextplayer.feature.player.extensions.uriToSubtitleConfig
 import dev.anilbeesetti.nextplayer.feature.player.extensions.videoDecoderMode
 import dev.anilbeesetti.nextplayer.feature.player.extensions.videoZoom
 import dev.anilbeesetti.nextplayer.feature.player.model.DecoderTrackType
+import dev.anilbeesetti.nextplayer.feature.player.popup.PopupWindowController
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.DecoderManager
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.DecoderMode
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory
@@ -141,7 +142,7 @@ class PlayerService : MediaSessionService() {
             Logger.logInfo(
                 DECODER_LOG_TAG,
                 "Video decoder initialized with requested=${decoderManager.videoMode} " +
-                    "as ${decoderManager.activeVideoMode}: $decoderName",
+                        "as ${decoderManager.activeVideoMode}: $decoderName",
             )
             decoderRecoveryManager.onDecoderInitialized(DecoderTrackType.VIDEO)
         }
@@ -155,7 +156,7 @@ class PlayerService : MediaSessionService() {
             Logger.logInfo(
                 DECODER_LOG_TAG,
                 "Audio decoder initialized with requested=${decoderManager.audioMode} " +
-                    "as ${decoderManager.activeAudioMode}: $decoderName",
+                        "as ${decoderManager.activeAudioMode}: $decoderName",
             )
             decoderRecoveryManager.onDecoderInitialized(DecoderTrackType.AUDIO)
         }
@@ -173,7 +174,7 @@ class PlayerService : MediaSessionService() {
             Logger.logInfo(
                 DECODER_LOG_TAG,
                 "Video tracks: ${videoTracks.ifEmpty { "none" }}, " +
-                    "unmapped=${trackSelector.unmappedTrackCount(C.TRACK_TYPE_VIDEO)}",
+                        "unmapped=${trackSelector.unmappedTrackCount(C.TRACK_TYPE_VIDEO)}",
             )
         }
 
@@ -195,9 +196,9 @@ class PlayerService : MediaSessionService() {
             Logger.logError(
                 DECODER_LOG_TAG,
                 "Player error with requestedVideo=${decoderManager.videoMode}, " +
-                    "activeVideo=${decoderManager.activeVideoMode}, " +
-                    "requestedAudio=${decoderManager.audioMode}, " +
-                    "activeAudio=${decoderManager.activeAudioMode}: ${error.message}",
+                        "activeVideo=${decoderManager.activeVideoMode}, " +
+                        "requestedAudio=${decoderManager.audioMode}, " +
+                        "activeAudio=${decoderManager.activeAudioMode}: ${error.message}",
             )
         }
     }
@@ -233,7 +234,7 @@ class PlayerService : MediaSessionService() {
             when (reason) {
                 DISCONTINUITY_REASON_SEEK,
                 DISCONTINUITY_REASON_AUTO_TRANSITION,
-                -> {
+                    -> {
                     if (newPosition.mediaItem == null || oldMediaItem == newPosition.mediaItem) return
 
                     val updatedPosition = oldPosition.positionMs.takeIf { reason == DISCONTINUITY_REASON_SEEK } ?: C.TIME_UNSET
@@ -340,10 +341,10 @@ class PlayerService : MediaSessionService() {
 
             val player = mediaSession?.player
             val shouldResetPlaybackParameters = playbackState == Player.STATE_ENDED ||
-                (
-                    playbackState == Player.STATE_IDLE &&
-                        player?.mediaItemCount == 0
-                )
+                    (
+                            playbackState == Player.STATE_IDLE &&
+                                    player?.mediaItemCount == 0
+                            )
             if (shouldResetPlaybackParameters) {
                 mediaSession?.player?.trackSelectionParameters = TrackSelectionParameters.DEFAULT
                 mediaSession?.player?.setPlaybackSpeed(playerPreferences.defaultPlaybackSpeed)
@@ -583,9 +584,9 @@ class PlayerService : MediaSessionService() {
 
                 CustomCommands.SET_VIDEO_DECODER_MODE -> {
                     val mode = args.decoderMode(CustomCommands.VIDEO_DECODER_MODE_KEY)
-                        ?: return@future SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE)
+                        ?: return@future SessionResult(SessionError.ERROR_BAD_VALUE)
                     val player = mediaSession?.player as? ExoPlayer
-                        ?: return@future SessionResult(SessionResult.RESULT_ERROR_INVALID_STATE)
+                        ?: return@future SessionResult(SessionError.ERROR_INVALID_STATE)
                     decoderRecoveryManager.onUserSelection(DecoderTrackType.VIDEO, mode)
                     selectDecoder(DecoderTrackType.VIDEO, mode)
                     serviceScope.launch { handleUnsupportedTrack(player.currentTracks, DecoderTrackType.VIDEO) }
@@ -594,9 +595,9 @@ class PlayerService : MediaSessionService() {
 
                 CustomCommands.SET_AUDIO_DECODER_MODE -> {
                     val mode = args.decoderMode(CustomCommands.AUDIO_DECODER_MODE_KEY)
-                        ?: return@future SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE)
+                        ?: return@future SessionResult(SessionError.ERROR_BAD_VALUE)
                     val player = mediaSession?.player as? ExoPlayer
-                        ?: return@future SessionResult(SessionResult.RESULT_ERROR_INVALID_STATE)
+                        ?: return@future SessionResult(SessionError.ERROR_INVALID_STATE)
                     decoderRecoveryManager.onUserSelection(DecoderTrackType.AUDIO, mode)
                     selectDecoder(DecoderTrackType.AUDIO, mode)
                     serviceScope.launch { handleUnsupportedTrack(player.currentTracks, DecoderTrackType.AUDIO) }
@@ -605,10 +606,10 @@ class PlayerService : MediaSessionService() {
 
                 CustomCommands.TRY_DECODER_FALLBACK -> {
                     val retry = decoderRecoveryManager.confirmFallback()
-                        ?: return@future SessionResult(SessionResult.RESULT_ERROR_INVALID_STATE)
+                        ?: return@future SessionResult(SessionError.ERROR_INVALID_STATE)
                     if (!retryDecoderWith(retry)) {
                         decoderRecoveryManager.onNonDecoderError()
-                        return@future SessionResult(SessionResult.RESULT_ERROR_INVALID_STATE)
+                        return@future SessionResult(SessionError.ERROR_INVALID_STATE)
                     }
                     return@future SessionResult(SessionResult.RESULT_SUCCESS)
                 }
@@ -645,7 +646,27 @@ class PlayerService : MediaSessionService() {
                     return@future SessionResult(SessionResult.RESULT_SUCCESS)
                 }
 
+                CustomCommands.SHOW_POPUP_PLAYER -> {
+                    val popupPlayer = mediaSession?.player
+                        ?: return@future SessionResult(SessionError.ERROR_UNKNOWN)
+                    val returnUri = args.getString(CustomCommands.POPUP_RETURN_URI_KEY)?.toUri()
+                    PopupWindowController.show(
+                        context = applicationContext,
+                        player = popupPlayer,
+                        onExpandRequested = {
+                            startActivity(
+                                Intent(applicationContext, PlayerActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+                                    data = returnUri
+                                },
+                            )
+                        },
+                    )
+                    return@future SessionResult(SessionResult.RESULT_SUCCESS)
+                }
+
                 CustomCommands.STOP_PLAYER_SESSION -> {
+                    PopupWindowController.hide()
                     mediaSession?.run {
                         serviceScope.launch {
                             mediaRepository.updateMediumPosition(
@@ -744,6 +765,7 @@ class PlayerService : MediaSessionService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        PopupWindowController.hide()
         artworkLoadJob?.cancel()
         loudnessEnhancer?.release()
         loudnessEnhancer = null
@@ -1009,7 +1031,7 @@ internal val PlaybackException.isDecoderFailure: Boolean
         PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
         PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
         PlaybackException.ERROR_CODE_DECODING_RESOURCES_RECLAIMED,
-        -> true
+            -> true
 
         else -> false
     }

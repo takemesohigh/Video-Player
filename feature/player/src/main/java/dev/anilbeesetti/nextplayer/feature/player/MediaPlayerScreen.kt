@@ -127,6 +127,7 @@ fun MediaPlayerScreen(
     onSelectSubtitleClick: () -> Unit,
     onBackClick: () -> Unit,
     onPlayInBackgroundClick: () -> Unit,
+    onPopupPlayerClick: () -> Unit,
 ) {
     val volumeState = rememberVolumeState(
         player = player,
@@ -432,7 +433,7 @@ fun MediaPlayerScreen(
                                         ControlButtonsPosition.RIGHT -> Alignment.End
                                     },
                                     videoContentScale = videoZoomAndContentScaleState.videoContentScale,
-                                    isPipSupported = pictureInPictureState.isPipSupported,
+                                    isPipSupported = true,
                                     seekBarModifier = Modifier.thenIf(isTv) {
                                         focusRequester(seekBarFocusRequester)
                                             .focusProperties { up = playPauseFocusRequester }
@@ -454,11 +455,18 @@ fun MediaPlayerScreen(
                                         overlayView = OverlayView.VIDEO_CONTENT_SCALE
                                     },
                                     onPictureInPictureClick = {
-                                        if (!pictureInPictureState.hasPipPermission) {
-                                            Toast.makeText(context, coreUiR.string.enable_pip_from_settings, Toast.LENGTH_SHORT).show()
-                                            pictureInPictureState.openPictureInPictureSettings()
-                                        } else {
-                                            pictureInPictureState.enterPictureInPictureMode()
+                                        when {
+                                            pictureInPictureState.isPipSupported -> {
+                                                if (!pictureInPictureState.hasPipPermission) {
+                                                    Toast.makeText(context, coreUiR.string.enable_pip_from_settings, Toast.LENGTH_SHORT).show()
+                                                    pictureInPictureState.openPictureInPictureSettings()
+                                                } else {
+                                                    pictureInPictureState.enterPictureInPictureMode()
+                                                }
+                                            }
+                                            // Below API 26 (no system PiP): fall back to a
+                                            // movable overlay window instead.
+                                            else -> onPopupPlayerClick()
                                         }
                                     },
                                 )
@@ -552,10 +560,10 @@ fun MediaPlayerScreen(
 
     val allDecoderModesFailed = decoderRecoveryState.status == DecoderRecoveryStatus.FAILED
     val showPlayerError = allDecoderModesFailed ||
-        (
-            decoderRecoveryState.status == DecoderRecoveryStatus.NONE &&
-                errorState.playbackError != null
-        )
+            (
+                    decoderRecoveryState.status == DecoderRecoveryStatus.NONE &&
+                            errorState.playbackError != null
+                    )
     if (showPlayerError) {
         AlertDialog(
             onDismissRequest = { },

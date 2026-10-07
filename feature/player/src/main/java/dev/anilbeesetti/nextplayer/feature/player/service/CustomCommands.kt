@@ -28,6 +28,7 @@ enum class CustomCommands(val customAction: String) {
     SET_VIDEO_DECODER_MODE(customAction = "SET_VIDEO_DECODER_MODE"),
     SET_AUDIO_DECODER_MODE(customAction = "SET_AUDIO_DECODER_MODE"),
     TRY_DECODER_FALLBACK(customAction = "TRY_DECODER_FALLBACK"),
+    SHOW_POPUP_PLAYER(customAction = "SHOW_POPUP_PLAYER"),
     ;
 
     val sessionCommand = SessionCommand(customAction, Bundle.EMPTY)
@@ -53,6 +54,7 @@ enum class CustomCommands(val customAction: String) {
         const val DECODER_RECOVERY_STATUS_KEY = "decoder_recovery_status"
         const val DECODER_RECOVERY_TRACK_TYPE_KEY = "decoder_recovery_track_type"
         const val UNSUPPORTED_DECODER_MODE_KEY = "unsupported_decoder_mode"
+        const val POPUP_RETURN_URI_KEY = "popup_return_uri"
     }
 }
 
@@ -104,6 +106,18 @@ fun MediaController.setSubtitleSpeed(speed: Float) {
 suspend fun MediaController.getSubtitleSpeed(): Float {
     val result = sendCustomCommand(CustomCommands.GET_SUBTITLE_SPEED.sessionCommand, Bundle.EMPTY)
     return result.await().extras.getFloat(CustomCommands.SUBTITLE_SPEED_KEY, 1f)
+}
+
+/**
+ * Asks the service to open the floating popup player. Returns true once the service has
+ * opened it; the caller should wait for that before finishing its own UI.
+ */
+suspend fun MediaController.showPopupPlayer(returnUri: Uri?): Boolean {
+    val args = Bundle().apply {
+        putString(CustomCommands.POPUP_RETURN_URI_KEY, returnUri?.toString())
+    }
+    val result = sendCustomCommand(CustomCommands.SHOW_POPUP_PLAYER.sessionCommand, args).await()
+    return result.resultCode == SessionResult.RESULT_SUCCESS
 }
 
 fun MediaController.stopPlayerSession() {

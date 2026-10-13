@@ -28,7 +28,7 @@ Android devices
 - Control playback speed
 - External Subtitle support
 - Zoom gesture
-- Picture-in-picture mode — **removed in this fork** (see Note below)
+- Picture-in-picture mode 
 - Background playback
 - Android TV version
 - Search Functionality
@@ -37,9 +37,11 @@ Android devices
 
 ## Note
 
-The code is derived from anilbeesetti/nextplayer at v0.18.0 under GPL-3.0, with minSdk lowered back to 23 (Android 6.0) for wider device support.
+The code is derived from [anilbeesetti/nextplayer](https://github.com/anilbeesetti/nextplayer) at v0.18.0 under GPL-3.0, with minSdk lowered back to 23 (Android 6.0) for wider device support.
 
 Picture-in-picture support has been removed in this fork. Upstream's PiP implementation depends on `androidx.core:core-pip`, which declares minSdk 24 in its own manifest and is incompatible with this fork's minSdk 23. Since PiP itself requires Android 8.0 (API 26) regardless of this library, dropping it costs nothing on this fork's minimum-supported devices — it only affects API 26+ devices, which would otherwise have had PiP available. If you fork this project and want PiP support restored on API 26+ while keeping minSdk 23 for older devices, you'll need to reimplement it using the framework's `android.app.PictureInPictureParams` API directly instead of `core-pip`.
+
+Update: Picture-in-Picture is restored for api 23 by implementing a custom picture-in-picture
 
 ## Translations
 
